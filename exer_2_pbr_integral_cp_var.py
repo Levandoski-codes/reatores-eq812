@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -11,16 +13,13 @@ from scipy.integrate import trapz
 import matplotlib.pyplot as plt
 
 
-def function(X): 
+def function(X, T): 
     P = 20 # atm
-    T0 = 750 #500 # K
     TR = 298 # K
+    T0 = 750    
     
     FE0 = 945894.82 # mol/h
     FI = 2417286.76 # mol/h
-    
-#    FE0 = 904493.1626 # mol/h
-#    FI = 1156647.238 * 2# mol/h
     
 #    yE0 = FE0 / (FE0 + FI)
     
@@ -39,27 +38,20 @@ def function(X):
     
     R = 1.987 # cal/mol*K
     R_u = 8.314 #J/mol*K
-#    R = R_u
     
     dGA = -133000
     dGE = -167900
     dGH = 0
     
     dG_padrao = dGA + dGH - dGE
-#    dG_padrao = 34900
     
-    dHrx = 82500 # J/mol*K
-    #Ref: https://webbook.nist.gov/chemistry/name-ser/
-#    CpE = 95.78 # J/mol*K a 500K
-#    CpH = 29.26 # J/mol*K
-#    CpA = 76.68 # J/mol*K 
-#    CpI = 35.22 # J/mol*K aproximação
+    dHrx = 82500 # J/mol*K    
     
-    CpE = 118.83 # J/mol*K a 750
-    CpH = 29.50 # J/mol*K
-    CpA = 96.04 # J/mol*K 
-    CpI = 38.00 # J/mol*K aproximação
-
+    CpA = 8.314*(1.693+0.017978*T - 0.000006158*T**2)
+    CpE = 8.314*(3.518+0.020001*T - 0.000006002*T**2)
+    CpH = 8.314*(3.249+0.000422*T + (0.083*10**5 / (T**2)))
+    CpI = 8.314*(3.47+0.00145*T + (0.121*10**5 / (T**2)))
+    
     dCp = CpA + CpH - CpE
     
     T_num = X * (-dHrx) + (CpE + (FI/FE0)*CpI)*T0 + X*TR*dCp
@@ -67,7 +59,7 @@ def function(X):
     T = T_num/T_den    
     
     K = np.exp(-dG_padrao/(R_u*T))
-#    K = 2.26e-4
+    
     KE = np.exp(5560/(R*T) - 5.97) # atm^-1
     KA = np.exp(11070/(R*T) - 9.40) # atm^-1
     KH = np.exp(6850/(R*T) - 7.18) # atm^-1
@@ -75,27 +67,35 @@ def function(X):
     
     rE = k*KE*(PE - (PA*PH)/K) / (1 + KE*PE + KA*PA + KH*PH)**2
     
-#    dXdW = rE/FE0
     
     print("T {}\n X {}\n FE {}\n FI {}\n FA {}\n rE {}".format(T, X, FE, FI, FA, rE))
+    print("CpA {}\n CpH {}\n CpE {}\n CpI {}\n".format(CpA, CpH, CpE, CpI))
     
-    return FE0/-rE
+    return FE0/-rE, T, -rE
 
 
 x = np.linspace(0, 0.75, 20)
+T = 750 
 
-#w_eval = None
-#w = [0, 1e4] # g
+sol = []
+T_axis = []
+re_axis = []
 
-sol = function(x)
+for i in x:
+    reac, T, re = function(i, T)
+    sol.append(reac)
+    T_axis.append(T)
+    re_axis.append(re)
+    
+sol = np.asarray(sol)
 
 plt.xlabel("x")
 plt.ylabel("FE0/-rE")
 plt.plot(x, sol)
+plt.show()
+plt.plot(x, T_axis)
+plt.show()
+
+plt.plot(x, re_axis)
 
 print(trapz(sol, x)/1000)
-#
-#CpA = 8.314(1.693+0.017978*T - 0.000006158*T**2)
-#CpE = 8.314(3.518+0.020001*T - 0.000006002*T**2)
-#CpH = 8.314(3.249+0.000422*T + (0.083*10**5 / (T**2)))
-#CpI = 8.314(3.47+0.00145*T + (0.121*10**5 / (T**2)))
