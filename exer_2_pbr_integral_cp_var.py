@@ -9,7 +9,7 @@ Created on Wed Oct  7 00:32:39 2020
 """
 
 import numpy as np
-from scipy.integrate import trapz
+from scipy.integrate import simps
 import matplotlib.pyplot as plt
 
 
@@ -32,18 +32,18 @@ def function(X, T):
     yH = FH/FT
     yA = FA/FT
     
-    PE = yE*P
-    PH = yH*P
-    PA = yA*P
+    PE = yE*P # atm
+    PH = yH*P # atm
+    PA = yA*P # atm
     
     R = 1.987 # cal/mol*K
     R_u = 8.314 #J/mol*K
     
-    dGA = -133000
-    dGE = -167900
-    dGH = 0
+    dGA = -133000 # J/mol
+    dGE = -167900 # J/mol
+    dGH = 0 # J/mol
     
-    dG_padrao = dGA + dGH - dGE
+    dG_padrao = dGA + dGH - dGE # J/mol
     
     dHrx = 82500 # J/mol*K    
     
@@ -69,12 +69,12 @@ def function(X, T):
     
     
     print("T {}\n X {}\n FE {}\n FI {}\n FA {}\n rE {}".format(T, X, FE, FI, FA, rE))
-    print("CpA {}\n CpH {}\n CpE {}\n CpI {}\n".format(CpA, CpH, CpE, CpI))
+    print("CpA {}\n CpH {}\n CpE {}\n CpI {}\n dCp {}\n".format(CpA, CpH, CpE, CpI, dCp))
     
     return FE0/-rE, T, -rE
 
 
-x = np.linspace(0, 0.75, 20)
+x = np.linspace(0, 0.75, 25)
 T = 750 
 
 sol = []
@@ -89,13 +89,26 @@ for i in x:
     
 sol = np.asarray(sol)
 
-plt.xlabel("x")
-plt.ylabel("FE0/-rE")
+
+fig = plt.figure(dpi=100)
+plt.title("Gráfico de Levenspiel")
+plt.xlabel("X (Conversão)")
+plt.ylabel(r"$\frac{F_{E0}}{-r_E}$")
 plt.plot(x, sol)
 plt.show()
+
+fig = plt.figure(dpi=100)
+plt.title("Temperatura")
+plt.xlabel("X (Conversão)")
+plt.ylabel("Temperatura (ºC)")
 plt.plot(x, T_axis)
 plt.show()
 
+
+fig = plt.figure(dpi=100)
+plt.title("Taxa de reação")
+plt.xlabel("X (Conversão)")
+plt.ylabel("$r_e$")
 plt.plot(x, re_axis)
 
-print(trapz(sol, x)/1000)
+print(f"Massa de Catalizador {simps(sol, x)/1000:5.7} kg")
