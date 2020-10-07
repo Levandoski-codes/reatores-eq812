@@ -13,26 +13,20 @@ from scipy.integrate import simps
 import matplotlib.pyplot as plt
 
 
-def function(X, T, T0, P):
-    TR = 298 # K    
+def function(X, T, T0, P0):
+    TR = 298 # K  
     
     FE0 = 945894.82 # mol/h
     FI = 2417286.76 # mol/h
     
-#    yE0 = FE0 / (FE0 + FI)
+    yE0 = FE0 / (FE0 + FI)    
+    PE0 = yE0*P0
+        
+    epslon = 0.28
     
-    FE = FE0*(1 - X)
-    FH = FE0*X
-    FA = FE0*X
-    FT = (FE + FI + FH + FA)
-    
-    yE = FE/FT
-    yH = FH/FT
-    yA = FA/FT
-    
-    PE = yE*P # atm
-    PH = yH*P # atm
-    PA = yA*P # atm
+    PE = (PE0*(1-X)/(1+epslon*X))*(T0/T)
+    PH = (PE0*X/(1+epslon*X))*(T0/T)
+    PA = (PE0*X/(1+epslon*X))*(T0/T)
     
     R = 1.987 # cal/mol*K
     R_u = 8.314 #J/mol*K
@@ -65,7 +59,7 @@ def function(X, T, T0, P):
     
     rE = k*KE*(PE - (PA*PH)/K) / (1 + KE*PE + KA*PA + KH*PH)**2
     
-    
+#    
 #    print("T {}\n X {}\n FE {}\n FI {}\n FA {}\n rE {}".format(T, X, FE, FI, FA, rE))
 #    print("CpA {}\n CpH {}\n CpE {}\n CpI {}\n dCp {}\n".format(CpA, CpH, CpE, CpI, dCp))
     
@@ -74,7 +68,7 @@ def function(X, T, T0, P):
 
 x = np.linspace(0, 0.75, 25)
 T = T0 = 750 # K
-P = 50 # atm
+P0 = 50 # atm
 
 sol = []
 T_axis = []
@@ -82,40 +76,40 @@ re_axis = []
 reac_axis = []
 
 for i in x:
-    reac, T, re = function(i, T, T0, P)
+    reac, T, re = function(i, T, T0, P0)
     reac_axis.append(reac)
     T_axis.append(T)
     re_axis.append(re)
 
-print(f"Massa de Catalisador sem P_var {simps(reac_axis, x)/1000:5.7} kg")
+print(f"Massa de Catalisador com P_var {simps(reac_axis, x)/1000:5.7} kg")
 
-#
-#fig = plt.figure(dpi=100)
-#plt.title("Gráfico de Levenspiel")
-#plt.xlabel("X (Conversão)")
-#plt.ylabel(r"$\frac{F_{E0}}{-r_E}$")
-#plt.plot(x, reac_axis, marker=".")
-#plt.show()
-#
-#fig = plt.figure(dpi=100)
-#plt.title("Temperatura")
-#plt.xlabel("X (Conversão)")
-#plt.ylabel("Temperatura (ºC)")
-#plt.plot(x, T_axis)
-#plt.show()
-#
-#
-#fig = plt.figure(dpi=100)
-#plt.title("Taxa de reação")
-#plt.xlabel("X (Conversão)")
-#plt.ylabel("$r_e$")
-#plt.plot(x, re_axis)
-#plt.show()
-#
-#
-#fig = plt.figure(dpi=100)
-#plt.title("Taxa de reação")
-#plt.xlabel("T (Conversão)")
-#plt.ylabel("$r_e$")
-#plt.plot(T_axis, re_axis)
-#plt.show()
+
+fig = plt.figure(dpi=100)
+plt.title("Gráfico de Levenspiel")
+plt.xlabel("X (Conversão)")
+plt.ylabel(r"$\frac{F_{E0}}{-r_E}$")
+plt.plot(x, reac_axis, marker=".")
+plt.show()
+
+fig = plt.figure(dpi=100)
+plt.title("Temperatura")
+plt.xlabel("X (Conversão)")
+plt.ylabel("Temperatura (ºC)")
+plt.plot(x, T_axis)
+plt.show()
+
+
+fig = plt.figure(dpi=100)
+plt.title("Taxa de reação")
+plt.xlabel("X (Conversão)")
+plt.ylabel("$r_e$")
+plt.plot(x, re_axis)
+plt.show()
+
+
+fig = plt.figure(dpi=100)
+plt.title("Taxa de reação")
+plt.xlabel("T (Conversão)")
+plt.ylabel("$r_e$")
+plt.plot(T_axis, re_axis)
+plt.show()
