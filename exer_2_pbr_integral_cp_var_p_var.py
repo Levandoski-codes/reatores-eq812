@@ -59,16 +59,15 @@ def function(X, T, T0, P0):
     
     rE = k*KE*(PE - (PA*PH)/K) / (1 + KE*PE + KA*PA + KH*PH)**2
     
-#    
 #    print("T {}\n X {}\n FE {}\n FI {}\n FA {}\n rE {}".format(T, X, FE, FI, FA, rE))
 #    print("CpA {}\n CpH {}\n CpE {}\n CpI {}\n dCp {}\n".format(CpA, CpH, CpE, CpI, dCp))
-    
+    print(PE, PA)
     return FE0/-rE, T, -rE
 
 
-x = np.linspace(0, 0.75, 25)
+x = np.linspace(0, 0.75, 15)
 T = T0 = 750 # K
-P0 = 50 # atm
+P0 = 20 # atm
 
 sol = []
 T_axis = []
