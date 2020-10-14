@@ -6,10 +6,11 @@ Created on Tue Oct 13 17:53:07 2020
 @author: levandoski
 """
 import numpy as np 
+import matplotlib.pyplot as plt
+from scipy.integrate import odeint
 
-def bat(y, t):
+def bat(y, t, troca):
     X, T = y
-    T = 570
     TR = 298 # K
     
     A = 1.94e15 # min^-1
@@ -27,18 +28,21 @@ def bat(y, t):
     
     Mo = 384.6 # g mol^-1
     
-#    # dados trocador
-#    U = 230 #W m^-2 K^−1    
-#    mc = 10 #kg min^-1
-#    Cpc = 20 # J g^-1 K^-1    
-#    Ta1 = 590 # K  
-#    d = 1.2 # m    
-#    h = d*((5**(1/2)) - 2)/2 # m    
-#    Acin = 2*np.pi*d**2    
-#    Acal = (np.pi*h**2)/2    
-#    Area = Acin + Acal   
-    
-    Q = 0 # U*Area*(T - Tf)
+#    # dados trocador         <----------- ########################
+    if troca:
+        U = 230 #W m^-2 K^−1    
+        mc = 10 #kg min^-1
+        Cpc = 20 # J g^-1 K^-1    
+        Ta1 = 5900 # K  
+        d = 1.2 # m    
+        h = d*((5**(1/2)) - 2)/2 # m    
+        Acin = 2*np.pi*d**2    
+        Acal = np.pi*(d/2)*h    
+        Area = Acin + Acal   
+        
+        Q = mc*Cpc*(T - Ta1)*(1 - np.exp(-U*Area/(mc*Cpc)))
+    else:
+        Q = 0
     
     rho_o = 900 # kg m^-3
     
@@ -66,27 +70,37 @@ def bat(y, t):
 
 #y = X, T
 y0 = [0, 615] 
-t = np.linspace(0, 70, 200) # Será gerada uma solução com 101 amostras uniformemente espaçadas no intervalo 0 <= t <= 10
+t = np.linspace(0, 31, 200)
 
-from scipy.integrate import odeint
-sol = odeint(bat, y0, t) # Chamada de odeint para gerar a solução. Para fornecer b e c para pend é usado a argumento args
-print(sol)
+troca = True
 
+sol = odeint(bat, y0, t, args=(troca, )) # Chamada de odeint para gerar a solução.
+#print(sol[-20:])
+X_q, T_q = sol[:, 0], sol[:, 1]
 
-import matplotlib.pyplot as plt
-plt.plot(t, sol[:, 0], 'b', label='X(t)')
-#plt.plot(t, sol[:, 1], 'g', label='T(t)')
+troca = False
+sol = odeint(bat, y0, t, args=(troca, )) # Chamada de odeint para gerar a solução.
+#print(sol[-20:])
+X, T = sol[:, 0], sol[:, 1]
+
+plt.figure(dpi=100)
+plt.plot(t, X, 'b', label='X(t)')
+plt.plot(t, X_q, 'r', label='Com Q, X(t)')
 plt.legend(loc='best')
-plt.xlabel('t')
+plt.xlabel('t (min)')
 plt.grid()
 plt.show()
 
 
-plt.plot(t, sol[:, 1], 'g', label='T(t)')
+plt.figure(dpi=100)
+plt.plot(t, T, 'g', label='T(t)')
+plt.plot(t, T_q, 'r', label='Com Q, T(t)')
 plt.legend(loc='best')
-plt.xlabel('t')
+plt.xlabel('t (min)')
 plt.grid()
 plt.show()
 
+
+#X_q, T_q = sol[:, 0], sol[:, 1]
 
 
