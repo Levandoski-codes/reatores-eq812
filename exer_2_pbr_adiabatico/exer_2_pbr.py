@@ -7,7 +7,7 @@ Created on Wed Oct  7 00:32:39 2020
 """
 
 import numpy as np
-from scipy.integrate import solve_ivp
+from scipy.integrate import solve_ivp, odeint
 import matplotlib.pyplot as plt
 
 
@@ -77,21 +77,29 @@ def function(W, X):
     
     dXdW = rE/FE0
     
-    print("T {}, X {}, W {}, FE {}, FI {}, FA {}, rE {}".format(T, X, W, FE, FI, FA, rE))
+#    print("T {}, X {}, W {}, FE {}, FI {}, FA {}, rE {}".format(T, X, W, FE, FI, FA, rE))
     
     return dXdW
 
 
-w_eval = np.linspace(0, 1200000, 100)
+w_eval = np.linspace(0, 12000, 100)
 w = [min(w_eval), max(w_eval)]
 
 #w_eval = None
 #w = [0, 1e4] # g
 
-sol = solve_ivp(function, w, [0, ], t_eval=w_eval)
+#sol = solve_ivp(function, w, [0, ], t_eval=w_eval)
 
-x = sol.y[0, :]
-w = sol.t
+#x = sol.y[0, :]
+#w = sol.t
+#plt.xlabel("x")
+#plt.ylabel("w")
+#plt.plot(x, w)
+
+
+sol = odeint(function, [0, ], w)
+
+x = sol[:, 0]
 plt.xlabel("x")
 plt.ylabel("w")
 plt.plot(x, w)

@@ -24,23 +24,21 @@ def bat(y, t, troca):
     Cpo = 966.15 # J mol^−1 K^−1
     Cpa = 123 # J mol^−1 K^−1
     Cps = 843.15 # J mol^−1 K^−1
-    
-    
-    Mo = 384.6 # g mol^-1
+
     
 #    # dados trocador         <----------- ########################
     if troca:
-        U = 230 #W m^-2 K^−1    
+        U = 230*60 #W m^-2 K^−1  * 60 s min^-1
         mc = 10 #kg min^-1
-        Cpc = 20 # J g^-1 K^-1    
-        Ta1 = 5900 # K  
+        Cpc = 20000 # J kg^-1 K^-1    
+        Ta1 = 590 # K  
         d = 1.2 # m    
         h = d*((5**(1/2)) - 2)/2 # m    
         Acin = 2*np.pi*d**2    
-        Acal = np.pi*(d/2)*h    
+        Acal = 3.1416 * (h**2 + (d**2)/4) #m2
         Area = Acin + Acal   
         
-        Q = mc*Cpc*(T - Ta1)*(1 - np.exp(-U*Area/(mc*Cpc)))
+        Q = mc*Cpc*(Ta1 - T)*(1 - np.exp(-U*Area/(mc*Cpc)))
     else:
         Q = 0
     
@@ -61,46 +59,51 @@ def bat(y, t, troca):
     
     ra = -k*Na0*(1 - X)/V
     
-    dTdt = (Q + (-deltaH)*(-ra*V))/(Na0 * (Cpo + deltaCps*X))
+    dTdt = (Q + (-deltaH)*(-ra*V))/(Na0 * Cpo)
     
-    dXdt = (-ra*V)/Na0    
+    dXdt = k * (1 - X)
     
     dydt = [dXdt, dTdt]
     return dydt
 
 #y = X, T
 y0 = [0, 615] 
-t = np.linspace(0, 31, 200)
+t = np.linspace(0, 200, 100)
 
 troca = True
-
-sol = odeint(bat, y0, t, args=(troca, )) # Chamada de odeint para gerar a solução.
-#print(sol[-20:])
+sol = odeint(bat, y0, t, args=(troca, ))
 X_q, T_q = sol[:, 0], sol[:, 1]
 
 troca = False
-sol = odeint(bat, y0, t, args=(troca, )) # Chamada de odeint para gerar a solução.
-#print(sol[-20:])
+sol = odeint(bat, y0, t, args=(troca, ))
 X, T = sol[:, 0], sol[:, 1]
 
-plt.figure(dpi=100)
-plt.plot(t, X, 'b', label='X(t)')
-plt.plot(t, X_q, 'r', label='Com Q, X(t)')
+
+
+plt.figure(dpi=100, figsize=(9, 4))
+plt.plot(t, X, 'b', label='Sem Q, X(t)')
+plt.plot(t, X_q, 'r', label='Com Q, X(t)', linestyle='--')
 plt.legend(loc='best')
 plt.xlabel('t (min)')
+plt.ylabel('Conversão (X)')
+plt.title('Reator batelada X vs t')
+plt.ylim(0, 1.05)
+plt.xlim(0, 250)
 plt.grid()
 plt.show()
 
 
-plt.figure(dpi=100)
-plt.plot(t, T, 'g', label='T(t)')
-plt.plot(t, T_q, 'r', label='Com Q, T(t)')
+plt.figure(dpi=100, figsize=(9, 4))
+plt.plot(t, T, 'b', label='Sem Q, T(t)')
+plt.plot(t, T_q, 'r', label='Com Q, T(t)', linestyle='--')
 plt.legend(loc='best')
 plt.xlabel('t (min)')
+plt.ylabel('Temperatura (K)')
+plt.title('Reator batelada T vs t')
+plt.ylim(550, 620)
+plt.xlim(0, 250)
 plt.grid()
 plt.show()
 
-
-#X_q, T_q = sol[:, 0], sol[:, 1]
 
 
