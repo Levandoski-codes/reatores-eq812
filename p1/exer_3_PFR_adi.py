@@ -12,8 +12,10 @@ from scipy.integrate import odeint
 
 
 def function(X, T, T0):
-   
-    Fa0 = 133700/250 # g/h / g/mol  = mol/h
+    
+    
+    m = 133700# g/h
+    Fa0 = m/250 # g/h / g/mol  = mol/h
     
     T1 = 163 + 273.15 # K    
     Ea = 28960 # cal/g mol
@@ -26,19 +28,19 @@ def function(X, T, T0):
     
     k = k1*np.exp((Ea/R)*(1/T1 - 1/T))
     
-    m = 133700 # g/h
     rho = 0.9 * 1000 # g/cm³ kg/m³
     vo = m/rho
     vo = vo
     
-    ra = k*(Fa0/vo)*(1-X)
+    ra = k*((Fa0/vo)*(1-X))
+    Ca = (Fa0/vo)*(1-X)
     
     
-    return Fa0/ra, T, ra, k
+    return Fa0/ra, T, ra, k, Ca
 
-xf =0.97
+xf = 0.97
 
-x = np.linspace(0, xf, 100)
+x = np.linspace(0, xf, 1000)
 T = T0 = 20 # C
 T0 = 163 #<======================================== DEVIA SER 20
 
@@ -46,13 +48,15 @@ T_axis = []
 re_axis = []
 reac_axis = []
 k_axis = []
+Ca_axis = []
 
 for i in x:
-    reac, T, re, k = function(i, T, T0)
+    reac, T, re, k, Ca = function(i, T, T0)
     reac_axis.append(reac)
     T_axis.append(T)
     re_axis.append(re)
     k_axis.append(k)
+    Ca_axis.append(Ca)
     
     
 Vol = simps(reac_axis, x)
@@ -90,9 +94,17 @@ plt.show()
 
 fig = plt.figure(dpi=100)
 plt.title("Taxa de reação")
-plt.xlabel("T (Conversão)")
+plt.xlabel("T (K)")
 plt.ylabel("$-r_a$")
 plt.plot(T_axis, re_axis)
+plt.show()
+
+
+fig = plt.figure(dpi=100)
+plt.title("Ca")
+plt.xlabel("X (Conversão)")
+plt.ylabel("$C_a$")
+plt.plot(x, Ca_axis)
 plt.show()
 
 
@@ -106,7 +118,7 @@ def PFR(y, t):
     rho = 0.9
     vo = m/(rho*1000)
     T0 = 20
-    T0 = 163 #<======================================== DEVIA SER 20
+    T0 = 163 #<======================================== DEVERIA SER 20
     
     T1 = 163 + 273.15 # K
     Ea = 28960 # cal/g mol
@@ -126,7 +138,7 @@ def PFR(y, t):
     return dydt
 
 y0 = 0
-x = np.linspace(0, xf, 100) # h
+x = np.linspace(0, xf, 1000) # h
 
 sol = odeint(PFR, y0, x)
 V = sol
@@ -139,8 +151,6 @@ plt.ylabel('Conversão (X)')
 plt.title('Reator batelada X vs V')
 plt.grid()
 plt.show()
-
-
 
 
 
