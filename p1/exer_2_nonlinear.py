@@ -23,7 +23,7 @@ def func(x):
     
     return f
 
-root = fsolve(func, [1, 0, 0])
+root = fsolve(func, [1, 0, 0]) # chute inicial
 print(root)
 
-print(np.isclose(func(root), [0.0, 0.0, 0.0], atol=1e-5))  # func(root) should be almost 0.0.
+print(np.isclose(func(root), [0.0, 0.0, 0.0], atol=1e-5)) # usa o resultado encontrado pra verificar consegue zerar
